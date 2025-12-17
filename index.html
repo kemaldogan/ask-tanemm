@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geri Sayım</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at bottom, #020111, #000000 70%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+    canvas#stars { position: fixed; inset: 0; z-index: 0; }
+    .box {
+      position: relative;
+      z-index: 2;
+      background: rgba(255,255,255,0.08);
+      padding: 40px 50px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      max-width: 420px;
+      width: 90%;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 20px; }
+    #countdown { font-size: 2.4rem; font-weight: 700; margin: 20px 0; }
+    input, button {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      margin-top: 10px;
+      width: 100%;
+    }
+    button { cursor: pointer; background: #00c6ff; color: #000; font-weight: 600; }
+    .hidden { display: none; }
+
+    /* AŞK MEKTUBU */
+    #letter {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+      z-index: 3;
+      animation: fadeIn 1.5s ease forwards;
+    }
+    #letter .paper {
+      background: #fff;
+      color: #000;
+      padding: 40px;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 90%;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      animation: floatUp 1.5s ease forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    #typedText::after { content: '|'; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes floatUp { from { transform: translateY(40px); } to { transform: translateY(0); } }
+
+    /* KALPLER */
+    .heart {
+      position: absolute;
+      bottom: -20px;
+      animation: fly 4s linear forwards;
+      opacity: 0.8;
+    }
+    @keyframes fly {
+      to { transform: translateY(-120vh) translateX(40px); opacity: 0; }
+    }
+
+    /* FİNAL */
+    #finalScreen {
+      position: fixed;
+      inset: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 3.2rem;
+      z-index: 5;
+      animation: fadeIn 2s forwards;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <div class="box">
+    <h1>Önce küçük bir kontrol 👀</h1>
+
+    <div id="passwordBox">
+      <input type="password" id="passwordInput" placeholder="Şifreyi gir" />
+      <button onclick="checkPassword()">Devam et</button>
+    </div>
+
+    <div id="countdownBox" class="hidden">
+      <h1>Hazır ol… ⏳</h1>
+      <div id="countdown">00:00:00</div>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop>
+    <source src="lady-gaga-paparazzi.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    /* ================= AYARLAR ================= */
+    const correctPassword = "Seloş123.";
+    const targetDate = new Date("2025-12-17T19:37:00").getTime();
+
+    // ⚠️ ÖNEMLİ: Çok satırlı metin template literal ile TANIMLANDI
+    const text = `Canımın içi,
+
+Bu yıl benim hayatıma giren en değerli insansın. Ne kadar komik ocak ayında senden bihaberken şu anda sensiz bir gelecek hayal edemiyorum. 2026 yılı bizim yılımız olacak, tüm hedeflerimize, hayallerimize birlikte ulaştığımız, birbirimizi hep en ileriye taşıdığımız bir yıl olsun. Bu yıl Noel babadan bir dileğim yok çünkü zaten en büyük dileğim artık hayatımda.
+
+Seni çoooooooooooooooook seviyorum AŞK TANEM :)))`;
+
+    const finalSentence = "İYİ Kİ VARSIN AŞK TANEM :)))";
+
+    /* ================= ŞİFRE ================= */
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === correctPassword) {
+        document.getElementById("passwordBox").classList.add("hidden");
+        document.getElementById("countdownBox").classList.remove("hidden");
+      } else {
+        alert("Şifre yanlış 😅");
+      }
+    }
+
+    function playMusic() {
+      document.getElementById("bgMusic").play().catch(()=>{});
+    }
+
+    /* ================= GERİ SAYIM ================= */
+    const countdownEl = document.getElementById("countdown");
+    setInterval(() => {
+      const now = Date.now();
+      const distance = targetDate - now;
+      if (distance <= 0) return;
+      const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((distance % (1000 * 60)) / 1000);
+      countdownEl.textContent = `${h}sa ${m}dk ${s}sn`;
+    }, 1000);
+
+    /* ================= YILDIZLAR ================= */
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const stars = Array.from({ length: 150 }, () => ({ x: Math.random()*innerWidth, y: Math.random()*innerHeight, r: Math.random()*1.5 }));
+    (function drawStars(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle='white';
+      stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();});
+      requestAnimationFrame(drawStars);
+    })();
+
+    /* ================= FİNAL AKIŞ ================= */
+    let shown = false;
+    setInterval(() => {
+      if (Date.now() >= targetDate && !shown) {
+        shown = true;
+        playMusic();
+
+        document.body.insertAdjacentHTML('beforeend', `
+          <div id="letter">
+            <div class="paper">
+              <h2>Sevgilim,</h2>
+              <p id="typedText"></p>
+            </div>
+          </div>`);
+
+        let i = 0;
+        const typer = setInterval(() => {
+          document.getElementById('typedText').textContent += text.charAt(i);
+          i++;
+          if (i >= text.length) {
+            clearInterval(typer);
+            setTimeout(showFinal, 1500);
+          }
+        }, 85);
+
+        setInterval(() => {
+          const h = document.createElement('div');
+          h.className = 'heart';
+          h.textContent = '❤️';
+          h.style.left = Math.random()*100 + '%';
+          h.style.fontSize = 18 + Math.random()*22 + 'px';
+          document.querySelector('#letter .paper').appendChild(h);
+          setTimeout(()=>h.remove(),4000);
+        }, 150);
+      }
+    }, 1000);
+
+    function showFinal() {
+      document.body.insertAdjacentHTML('beforeend', `<div id="finalScreen">${finalSentence}</div>`);
+    }
+  </script>
+</body>
+</html>
